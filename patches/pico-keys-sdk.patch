@@ -1,0 +1,43 @@
+diff --git a/src/main.c b/src/main.c
+index 4df4647..615e29e 100644
+--- a/src/main.c
++++ b/src/main.c
+@@ -183,9 +183,8 @@ uint8_t button_press = 0;
+ bool wait_button() {
+     uint32_t button_timeout = 15000;
+     if (phy_data.up_btn_present) {
+-        button_timeout = phy_data.up_btn * 1000;
+-        if (button_timeout == 0) {
+-            return false;
++        if (phy_data.up_btn != 0) {
++            button_timeout = phy_data.up_btn * 1000;
+         }
+     }
+     uint32_t start_button = board_millis();
+@@ -318,6 +317,11 @@ int main(void) {
+ 
+     usb_init();
+ 
++    // finish storage setup before usb starts
++    // late flash writes can stall hid on macos
++    extern void init_fido(void);
++    init_fido();
++
+ #ifndef ENABLE_EMULATION
+ #ifdef ESP_PLATFORM
+     gpio_pad_select_gpio(BOOT_PIN);
+diff --git a/src/usb/usb_descriptors.c b/src/usb/usb_descriptors.c
+index d4db7d3..bb2fd65 100644
+--- a/src/usb/usb_descriptors.c
++++ b/src/usb/usb_descriptors.c
+@@ -309,8 +309,8 @@ uint8_t const *tud_descriptor_bos_cb(void) {
+ // array of pointer to string descriptors
+ char const *string_desc_arr [] = {
+     (const char[]) { 0x09, 0x04 }, // 0: is supported language is English (0x0409)
+-    "Pol Henarejos",                     // 1: Manufacturer
+-    "Pico Key",                       // 2: Product
++    "Larkspur Lab Prototype",          // 1: prototype issuer
++    "Larkspur FIDO Prototype",         // 2: product
+     "11223344",                      // 3: Serials, should use chip ID
+     "Config"               // 4: Vendor Interface
+     , "HID Interface"

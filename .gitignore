@@ -1,0 +1,8 @@
+build/
+.local/
+.venv/
+*.bin
+*.key
+*private*
+*.log
+.DS_Store
